@@ -244,32 +244,57 @@ def chat():
     """
     Emotion-aware chat endpoint.
     Uses ML to detect user's mood and provides empathetic responses.
+    Includes a keyword safety net to prevent tone-deaf replies on misclassification.
     """
     data = request.get_json()
     message = data.get('message', '').strip()
-    
+
     if not message:
         return error_response('"message" is required.')
-    
+
     try:
         # 1. Analyze user's emotional state using the MindCare Pipeline
         pred = predictor.predict(message)
         level = pred['level']
-        
-        # 2. Logic-based Empathetic Responses (CBT-inspired)
+
+        # 2. Keyword safety net — override level if negative emotions are clearly present
+        # This prevents the model from saying "I'm glad to hear that" when someone is sad.
+        msg_lower = message.lower()
+
+        negative_keywords = [
+            'lonely', 'alone', 'sad', 'unhappy', 'miserable', 'depressed',
+            'hopeless', 'worthless', 'lost', 'empty', 'numb', 'hurt',
+            'cry', 'crying', 'tears', 'grief', 'grieve', 'heartbroken',
+            'down', 'low', 'blue', 'gloomy', 'upset', 'broken', 'pain',
+            'tired', 'exhausted', 'drained', 'stuck', 'trapped', 'helpless',
+        ]
+        crisis_keywords = [
+            'suicidal', 'suicide', 'kill myself', 'end my life', 'want to die',
+            'no reason to live', 'better off dead', 'cant go on', "can't go on",
+        ]
+
+        has_negative = any(kw in msg_lower for kw in negative_keywords)
+        has_crisis   = any(kw in msg_lower for kw in crisis_keywords)
+
+        if has_crisis:
+            level = max(level, 6)
+        elif has_negative and level == 0:
+            level = 1  # Bump to at least Mild Stress for empathetic response
+
+        # 3. Empathetic, CBT-inspired responses per level
         responses = {
-            0: "I'm glad to hear that. I'm here if you ever need to talk or reflect on anything else.",
-            1: "It sounds like you're carrying a bit of stress. Remember to take a few deep breaths. What's been on your mind lately?",
-            2: "I hear you. Dealing with moderate stress can be draining. Have you tried any grounding exercises today?",
-            3: "That sounds really difficult. I'm here to listen. It might be helpful to talk to a trusted friend or counselor about this feeling.",
-            4: "I can feel how heavy this is for you. Please be kind to yourself right now. You don't have to carry this alone.",
-            5: "It sounds like you're going through a very tough time. Your feelings are valid. Would you like to explore some relaxation techniques together?",
-            6: "I'm very concerned about what you're sharing. Please reach out to a professional or a crisis line. You are important, and help is available.",
-            7: "I'm here with you. It sounds like you're in a lot of pain. Please, I encourage you to contact a crisis support service immediately. They are trained to help in exactly these moments."
+            0: "Thank you for sharing. I'm always here if you want to talk or reflect on anything.",
+            1: "I hear you — it sounds like things are weighing on you a bit. You're not alone. What's been on your mind lately?",
+            2: "I'm sorry you're feeling this way. It takes courage to open up. Would you like to talk about what's been going on?",
+            3: "That sounds really hard to carry. I want you to know your feelings are completely valid. I'm here to listen — tell me more.",
+            4: "I can feel how heavy this is for you. You don't have to go through this alone. Please be kind to yourself right now.",
+            5: "I'm really glad you're talking to me. What you're feeling is real and it matters. Would exploring some grounding techniques together help?",
+            6: "I'm genuinely concerned about you and I care about your well-being. Please consider reaching out to a professional or a crisis line — you deserve real support.",
+            7: "I'm right here with you. Please know you are not alone in this. I strongly encourage you to contact a crisis support service right now — they are trained to help with exactly this.",
         }
-        
+
         reply = responses.get(level, "I'm here to support you. Tell me more about how you're feeling.")
-        
+
         return jsonify({
             'status': 'success',
             'reply': reply,
