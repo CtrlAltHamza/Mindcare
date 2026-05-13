@@ -76,14 +76,51 @@ function HighlightedText({ text, highlights }) {
   );
 }
 
+// ─── Per-level recommendations ───────────────────────────────────────────────
+const LEVEL_RECOMMENDATIONS = {
+  0: {
+    consolation: "Great news — you appear to be doing well! Here are some tips to keep your mental wellness strong:",
+    steps: ["Maintain a consistent sleep schedule (7–8 hours).", "Stay physically active — 30 min daily.", "Nurture your social connections regularly.", "Practice mindfulness or journaling.", "Set small daily goals to maintain purpose."]
+  },
+  1: {
+    consolation: "Mild stress is normal. The fact you checked in is a great first step. Here's what you can try:",
+    steps: ["Try 5 minutes of deep breathing (inhale 4s, hold 4s, exhale 6s).", "Break tasks into smaller steps and tackle one at a time.", "Talk to a trusted friend about what's on your mind.", "Limit screen time before bed.", "Write down 3 things you are grateful for today."]
+  },
+  2: {
+    consolation: "Moderate stress can feel overwhelming. You don't have to figure it out alone. Try these steps:",
+    steps: ["Schedule a 15-min 'worry time' — write stressors down, then close the journal.", "Identify one thing you can control and take a small action on it.", "Use the 5-4-3-2-1 grounding technique (5 things you see, 4 touch, 3 hear).", "Reduce caffeine and increase water intake.", "Consider speaking to a university counselor."]
+  },
+  3: {
+    consolation: "What you're carrying sounds heavy. Your feelings are valid. Here are meaningful steps forward:",
+    steps: ["Book an appointment with a campus counselor or therapist — it's a sign of strength.", "Try progressive muscle relaxation before bed.", "Reach out to someone you trust and share how you feel.", "Reduce your workload where possible — ask for help.", "Avoid isolating yourself. Even a short walk with someone helps."]
+  },
+  4: {
+    consolation: "Anxiety is treatable and you can feel better. Here are steps that genuinely help:",
+    steps: ["Practice diaphragmatic breathing daily — it calms the nervous system directly.", "Try the CBT thought record: write the anxious thought, the evidence for it, a balanced alternative.", "Limit news and social media, which amplify anxiety.", "Establish a calming nighttime routine (no screens 1hr before sleep).", "Speak to a professional about Cognitive Behavioural Therapy (CBT)."]
+  },
+  5: {
+    consolation: "You are brave for checking in. What you're experiencing is serious — you deserve real support:",
+    steps: ["Book an urgent appointment with a mental health professional today.", "Tell one trusted person exactly how you're feeling right now.", "Use the STOP technique: Stop, Take a breath, Observe thoughts, Proceed mindfully.", "Remove yourself from high-stress environments if possible.", "Call a mental health helpline — Pakistan: 0311-7786264."]
+  },
+  6: {
+    consolation: "I am truly concerned about your safety. Please take these steps immediately — you are not alone:",
+    steps: ["Call a crisis helpline now — Pakistan: 0311-7786264 | International: findahelpline.com", "Go to a safe place and tell someone you trust what you are feeling.", "If in immediate danger, go to your nearest emergency room.", "These feelings are temporary — help is real and it works.", "After immediate safety, connect with a mental health professional."]
+  },
+  7: {
+    consolation: "Your life has value and people care about you. Please take these steps right now:",
+    steps: ["Contact crisis services immediately — Pakistan: 0311-7786264 | Rozan: (051) 2890505", "Do not be alone right now — call or go to someone you trust.", "If you may harm yourself, go to the nearest hospital emergency room.", "After immediate safety, work with a psychiatrist or clinical psychologist.", "Recovery is real — many people have felt this way and found their way through."]
+  },
+};
+
 function ResultCard({ result }) {
   const levelInfo = LEVELS_INFO[Math.min(result.level, LEVELS_INFO.length - 1)];
   const isUrgent  = result.urgent;
+  const recs      = LEVEL_RECOMMENDATIONS[Math.min(result.level, 7)];
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
       className="glass-card" style={{ padding: 28, marginTop: 24, border: `2px solid ${isUrgent ? 'rgba(239,68,68,0.4)' : 'var(--border-card)'}` }}>
-      
+
       {isUrgent && (
         <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, padding: 16, marginBottom: 20 }}>
           <div style={{ color: "#EF4444", fontWeight: 700, marginBottom: 4 }}>🆘 Crisis Alert</div>
@@ -91,6 +128,7 @@ function ResultCard({ result }) {
         </div>
       )}
 
+      {/* Score row */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
         <div style={{ fontSize: 40, background: levelInfo?.bg, padding: 12, borderRadius: 16 }}>{result.icon}</div>
         <div>
@@ -103,13 +141,42 @@ function ResultCard({ result }) {
         </div>
       </div>
 
+      {/* Text highlights */}
       {result.highlights && result.highlights.length > 0 && (
-        <div style={{ background: "rgba(255,255,255,0.03)", padding: 16, borderRadius: 12, border: "1px solid var(--border-subtle)" }}>
+        <div style={{ background: "rgba(255,255,255,0.03)", padding: 16, borderRadius: 12, border: "1px solid var(--border-subtle)", marginBottom: 24 }}>
           <div style={{ fontSize: 12, color: "#94A3B8", marginBottom: 8, textTransform: "uppercase" }}>Text Analysis Highlights</div>
           <div style={{ fontSize: 15, lineHeight: 1.6 }}>
             <HighlightedText text={result.clean_text || ""} highlights={result.highlights} />
           </div>
         </div>
+      )}
+
+      {/* Recommendations */}
+      {recs && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+          style={{
+            background: "linear-gradient(135deg, rgba(20,184,166,0.07), rgba(139,92,246,0.05))",
+            border: "1px solid rgba(45,212,191,0.2)", borderRadius: 14, padding: "20px 22px"
+          }}
+        >
+          <div style={{ fontSize: 12, color: "#2DD4BF", fontWeight: 700, marginBottom: 10, letterSpacing: "0.04em" }}>
+            💡 WHAT YOU CAN DO NEXT
+          </div>
+          <p style={{ fontSize: 14, color: "#94A3B8", lineHeight: 1.65, marginBottom: 16 }}>{recs.consolation}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {recs.steps.map((step, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: 6, background: "rgba(45,212,191,0.1)",
+                  border: "1px solid rgba(45,212,191,0.25)", display: "flex", alignItems: "center",
+                  justifyContent: "center", flexShrink: 0, fontSize: 11, fontWeight: 800, color: "#2DD4BF"
+                }}>{i + 1}</div>
+                <span style={{ fontSize: 14, color: "#94A3B8", lineHeight: 1.55 }}>{step}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       )}
     </motion.div>
   );

@@ -242,25 +242,21 @@ def scrape_twitter():
 @require_json
 def chat():
     """
-    Emotion-aware chat endpoint.
-    Uses ML to detect user's mood and provides empathetic responses.
-    Includes a keyword safety net to prevent tone-deaf replies on misclassification.
+    Emotion-aware chat endpoint with recommendation support.
+    Detects advice-seeking intent and returns structured CBT-based recommendations.
     """
-    data = request.get_json()
+    data    = request.get_json()
     message = data.get('message', '').strip()
 
     if not message:
         return error_response('"message" is required.')
 
     try:
-        # 1. Analyze user's emotional state using the MindCare Pipeline
-        pred = predictor.predict(message)
-        level = pred['level']
-
-        # 2. Keyword safety net — override level if negative emotions are clearly present
-        # This prevents the model from saying "I'm glad to hear that" when someone is sad.
+        pred      = predictor.predict(message)
+        level     = pred['level']
         msg_lower = message.lower()
 
+        # ── Keyword safety net ────────────────────────────────────────────────
         negative_keywords = [
             'lonely', 'alone', 'sad', 'unhappy', 'miserable', 'depressed',
             'hopeless', 'worthless', 'lost', 'empty', 'numb', 'hurt',
@@ -279,25 +275,123 @@ def chat():
         if has_crisis:
             level = max(level, 6)
         elif has_negative and level == 0:
-            level = 1  # Bump to at least Mild Stress for empathetic response
+            level = 1
 
-        # 3. Empathetic, CBT-inspired responses per level
-        responses = {
+        # ── Advice-seeking intent detection ──────────────────────────────────
+        advice_triggers = [
+            'what should i do', 'how do i', 'how can i', 'what can i do',
+            'help me', 'give me advice', 'any advice', 'any tips', 'any suggestions',
+            'recommend', 'recommendation', 'suggestions', 'what to do',
+            'how to feel better', 'how to get better', 'get out of this',
+            'get back on track', 'right track', 'improve', 'fix this',
+            'overcome', 'deal with', 'cope with', 'move forward', 'next step',
+        ]
+        is_advice_seeking = any(trigger in msg_lower for trigger in advice_triggers)
+
+        # ── Per-level recommendations ─────────────────────────────────────────
+        RECOMMENDATIONS = {
+            0: {
+                'consolation': "You seem to be in a good place! Here are some tips to keep your mental wellness strong:",
+                'steps': [
+                    "Maintain a consistent sleep schedule — 7 to 8 hours a night.",
+                    "Stay physically active with at least 30 minutes of movement daily.",
+                    "Nurture your social connections — call a friend or family member.",
+                    "Practice mindfulness or journaling to stay self-aware.",
+                    "Set small daily goals to maintain a sense of purpose.",
+                ]
+            },
+            1: {
+                'consolation': "Feeling a bit stressed is completely normal — and the fact that you're seeking help is a great first step. Here's what you can try:",
+                'steps': [
+                    "Take 5 minutes right now for deep breathing (inhale 4s, hold 4s, exhale 6s).",
+                    "Break your tasks into smaller steps and tackle one at a time.",
+                    "Talk to a trusted friend or family member about what's on your mind.",
+                    "Limit screen time before bed for better rest.",
+                    "Write down three things you are grateful for today.",
+                ]
+            },
+            2: {
+                'consolation': "I hear you — moderate stress can feel really overwhelming. You don't have to figure it out all alone. Try these steps:",
+                'steps': [
+                    "Schedule a 'worry time' — 15 minutes a day to write your stressors down, then close the journal.",
+                    "Identify one thing you can control right now and take a small action on it.",
+                    "Use the 5-4-3-2-1 grounding technique: name 5 things you see, 4 you can touch, 3 you hear.",
+                    "Reduce caffeine and increase water intake — both affect mood significantly.",
+                    "Consider speaking to a university counselor for extra support.",
+                ]
+            },
+            3: {
+                'consolation': "What you're carrying sounds really heavy, and I want you to know your feelings are valid. Here are some meaningful steps forward:",
+                'steps': [
+                    "Please consider booking an appointment with a campus counselor or therapist — this is a sign of strength, not weakness.",
+                    "Try progressive muscle relaxation before bed to release physical tension.",
+                    "Reach out to someone you trust and share even a small part of what you're feeling.",
+                    "Reduce your workload where possible — it's okay to ask for extensions or help.",
+                    "Avoid isolating yourself. Even a short walk with someone can help.",
+                ]
+            },
+            4: {
+                'consolation': "Anxiety can feel paralyzing, but it is treatable and you can feel better. Here are steps that genuinely help:",
+                'steps': [
+                    "Practice diaphragmatic breathing daily — it directly calms the nervous system.",
+                    "Try the CBT thought record: write the anxious thought, the evidence for it, and a balanced alternative.",
+                    "Limit news and social media, which can amplify anxiety.",
+                    "Establish a calming nighttime routine — avoid screens 1 hour before sleep.",
+                    "Speak to a mental health professional about Cognitive Behavioural Therapy (CBT) — it's highly effective for anxiety.",
+                ]
+            },
+            5: {
+                'consolation': "You are incredibly brave for reaching out. What you're experiencing is serious, and you deserve real, professional support. Please take these steps:",
+                'steps': [
+                    "Book an urgent appointment with a mental health professional or doctor — today if possible.",
+                    "Tell one trusted person in your life exactly how you're feeling right now.",
+                    "Use the STOP technique when overwhelmed: Stop, Take a breath, Observe your thoughts, Proceed mindfully.",
+                    "Remove yourself from high-stress environments temporarily if you can.",
+                    "Call a mental health helpline for immediate guidance (Pakistan: 0311-7786264).",
+                ]
+            },
+            6: {
+                'consolation': "I am truly concerned about you and I care about your safety. Please take these steps immediately — you are not alone:",
+                'steps': [
+                    "Call a crisis helpline right now — Pakistan: 0311-7786264 | International: findahelpline.com",
+                    "Go to a safe place and tell someone you trust what you are feeling.",
+                    "Remove yourself from any situation that feels unsafe.",
+                    "If you are in immediate danger, go to your nearest emergency room.",
+                    "Remember: these feelings are temporary. Help is real and it works.",
+                ]
+            },
+            7: {
+                'consolation': "You reaching out right now matters more than you know. Please, take these steps — your life has value and people care about you:",
+                'steps': [
+                    "Contact a crisis service immediately — Pakistan: 0311-7786264 | Rozan Counselling: (051) 2890505",
+                    "Do not be alone right now — call or go to someone you trust.",
+                    "If you feel you may harm yourself, go to the nearest hospital emergency room.",
+                    "After immediate safety, work with a psychiatrist or clinical psychologist.",
+                    "Recovery is real — many people have felt exactly this way and found their way through with help.",
+                ]
+            },
+        }
+
+        # ── Build the response ────────────────────────────────────────────────
+        level_responses = {
             0: "Thank you for sharing. I'm always here if you want to talk or reflect on anything.",
             1: "I hear you — it sounds like things are weighing on you a bit. You're not alone. What's been on your mind lately?",
             2: "I'm sorry you're feeling this way. It takes courage to open up. Would you like to talk about what's been going on?",
             3: "That sounds really hard to carry. I want you to know your feelings are completely valid. I'm here to listen — tell me more.",
             4: "I can feel how heavy this is for you. You don't have to go through this alone. Please be kind to yourself right now.",
-            5: "I'm really glad you're talking to me. What you're feeling is real and it matters. Would exploring some grounding techniques together help?",
+            5: "I'm really glad you're talking to me. What you're feeling is real and it matters.",
             6: "I'm genuinely concerned about you and I care about your well-being. Please consider reaching out to a professional or a crisis line — you deserve real support.",
-            7: "I'm right here with you. Please know you are not alone in this. I strongly encourage you to contact a crisis support service right now — they are trained to help with exactly this.",
+            7: "I'm right here with you. Please know you are not alone in this. I strongly encourage you to contact a crisis support service right now.",
         }
 
-        reply = responses.get(level, "I'm here to support you. Tell me more about how you're feeling.")
+        reply         = level_responses.get(level, "I'm here to support you. Tell me more about how you're feeling.")
+        recs          = RECOMMENDATIONS.get(level, {})
+        recommendations = recs if is_advice_seeking else None
 
         return jsonify({
             'status': 'success',
             'reply': reply,
+            'recommendations': recommendations,
             'analysis': {
                 'level': level,
                 'level_name': pred['level_name'],
@@ -307,6 +401,7 @@ def chat():
     except Exception as e:
         traceback.print_exc()
         return error_response(str(e), 500)
+
 
 if __name__ == '__main__':
     port  = int(os.environ.get('PORT', 5000))
