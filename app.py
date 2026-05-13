@@ -238,6 +238,51 @@ def scrape_twitter():
         traceback.print_exc()
         return error_response(str(e), 500)
 
+@app.route('/api/chat', methods=['POST'])
+@require_json
+def chat():
+    """
+    Emotion-aware chat endpoint.
+    Uses ML to detect user's mood and provides empathetic responses.
+    """
+    data = request.get_json()
+    message = data.get('message', '').strip()
+    
+    if not message:
+        return error_response('"message" is required.')
+    
+    try:
+        # 1. Analyze user's emotional state using the MindCare Pipeline
+        pred = predictor.predict(message)
+        level = pred['level']
+        
+        # 2. Logic-based Empathetic Responses (CBT-inspired)
+        responses = {
+            0: "I'm glad to hear that. I'm here if you ever need to talk or reflect on anything else.",
+            1: "It sounds like you're carrying a bit of stress. Remember to take a few deep breaths. What's been on your mind lately?",
+            2: "I hear you. Dealing with moderate stress can be draining. Have you tried any grounding exercises today?",
+            3: "That sounds really difficult. I'm here to listen. It might be helpful to talk to a trusted friend or counselor about this feeling.",
+            4: "I can feel how heavy this is for you. Please be kind to yourself right now. You don't have to carry this alone.",
+            5: "It sounds like you're going through a very tough time. Your feelings are valid. Would you like to explore some relaxation techniques together?",
+            6: "I'm very concerned about what you're sharing. Please reach out to a professional or a crisis line. You are important, and help is available.",
+            7: "I'm here with you. It sounds like you're in a lot of pain. Please, I encourage you to contact a crisis support service immediately. They are trained to help in exactly these moments."
+        }
+        
+        reply = responses.get(level, "I'm here to support you. Tell me more about how you're feeling.")
+        
+        return jsonify({
+            'status': 'success',
+            'reply': reply,
+            'analysis': {
+                'level': level,
+                'level_name': pred['level_name'],
+                'confidence': pred['confidence']
+            }
+        })
+    except Exception as e:
+        traceback.print_exc()
+        return error_response(str(e), 500)
+
 if __name__ == '__main__':
     port  = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('DEBUG', 'False').lower() == 'true'

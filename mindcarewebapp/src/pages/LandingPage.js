@@ -49,33 +49,16 @@ function HeroSection({ onTry }) {
             fontSize: 'clamp(16px, 2vw, 20px)', color: '#94A3B8',
             maxWidth: 560, margin: '0 auto 40px', lineHeight: 1.7,
           }}>
-            Semantic & temporal analysis of text using SBERT + BiLSTM ensemble models.
-            8-level severity classification with SHAP explainability.
+            Your intelligent companion for emotional well-being. Get instant insights into your mental health using advanced semantic analysis and clinical frameworks.
           </motion.p>
 
           <motion.div variants={fadeUp} style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="btn-primary" onClick={onTry} style={{ fontSize: 15, padding: '15px 32px' }}>
-              <Brain size={18} /> Try the Assessment
+              <Brain size={18} /> Start Free Assessment
             </button>
-            <a href="#how-it-works">
-              <button className="btn-secondary" style={{ fontSize: 15 }}>
-                How it works <ChevronRight size={16} />
-              </button>
-            </a>
-          </motion.div>
-
-          <motion.div variants={fadeUp} style={{ display: 'flex', gap: 28, justifyContent: 'center', marginTop: 48, flexWrap: 'wrap' }}>
-            {[
-              { val: '92%+', label: 'Accuracy Target' },
-              { val: '8', label: 'Severity Levels' },
-              { val: '81K+', label: 'Training Samples' },
-              { val: '4', label: 'Fusion Models' },
-            ].map(({ val, label }) => (
-              <div key={label} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 28, fontWeight: 900, color: '#2DD4BF' }}>{val}</div>
-                <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</div>
-              </div>
-            ))}
+            <button className="btn-secondary" onClick={() => navigate('/chat')} style={{ fontSize: 15 }}>
+              Talk to MindCare <ChevronRight size={16} />
+            </button>
           </motion.div>
         </motion.div>
 
@@ -121,12 +104,12 @@ function HeroSection({ onTry }) {
 
 function FeaturesSection() {
   const features = [
-    { icon: Brain, color: '#2DD4BF', title: 'SBERT + BiLSTM Ensemble', desc: 'Gated fusion of sentence embeddings and bidirectional LSTM with self-attention. Targets >92% classification accuracy.' },
-    { icon: BarChart2, color: '#A78BFA', title: 'SHAP / LIME Explainability', desc: 'Every prediction includes keyword highlights and a plain-language decision trace so clinicians can verify the AI\'s reasoning.' },
-    { icon: Activity, color: '#34D399', title: '8-Level Severity Framework', desc: 'From Normal to Depression Risk (Urgent), each level maps to a specific intervention protocol aligned with clinical guidelines.' },
-    { icon: Shield, color: '#FB7185', title: 'PHQ-9 & GAD-7 Scoring', desc: 'Standardised clinical instruments integrated directly into the platform for multi-modal mental health assessment.' },
-    { icon: Zap, color: '#FBBF24', title: 'Real-Time Crisis Detection', desc: 'Keyword override with negation detection raises alert levels instantly when crisis indicators are found in text.' },
-    { icon: Lock, color: '#60A5FA', title: 'Privacy by Design', desc: 'AES-256 encryption, TLS 1.3, GDPR & HIPAA aligned. No inference data is retained after prediction.' },
+    { icon: Brain, color: '#2DD4BF', title: 'Sentiment-Aware AI', desc: 'Analyzes the emotional depth and patterns of your text to provide accurate wellness insights.' },
+    { icon: BarChart2, color: '#A78BFA', title: 'Clear Explainability', desc: 'Every insight is accompanied by clear, human-readable explanations of why the AI reached its conclusion.' },
+    { icon: Activity, color: '#34D399', title: 'Support Framework', desc: 'From routine wellness to urgent care, our platform provides tailored guidance based on clinical standards.' },
+    { icon: Shield, color: '#FB7185', title: 'Standardized Screening', desc: 'Clinical mental health tools integrated directly into the platform for comprehensive assessment.' },
+    { icon: Zap, color: '#FBBF24', title: 'Instant Crisis Alerts', desc: 'Our system identifies critical situations immediately, ensuring you get help when you need it most.' },
+    { icon: Lock, color: '#60A5FA', title: 'Total Privacy', desc: 'Your data is fully encrypted and never stored, keeping your personal mental health journey private and secure.' },
   ];
 
   return (
@@ -139,8 +122,8 @@ function FeaturesSection() {
           initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }} variants={stagger}
         >
           <motion.span variants={fadeUp} className="label-tag"><Star size={11} /> Core Capabilities</motion.span>
-          <motion.h2 variants={fadeUp} style={{ marginTop: 12 }}>Built for <span className="text-gradient">clinical precision</span></motion.h2>
-          <motion.p variants={fadeUp}>Four neural networks fused into a single, explainable pipeline — designed for student mental health in real-world deployments.</motion.p>
+          <motion.h2 variants={fadeUp} style={{ marginTop: 12 }}>Built for <span className="text-gradient">your well-being</span></motion.h2>
+          <motion.p variants={fadeUp}>A powerful suite of tools designed to support your mental health journey with privacy and precision.</motion.p>
         </motion.div>
 
         <motion.div

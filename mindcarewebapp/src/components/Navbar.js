@@ -21,20 +21,19 @@ export default function Navbar() {
     { label: 'Assessment', href: '/assessment' },
     { label: 'Reddit Analysis', href: '/reddit' },
     { label: 'X Analysis', href: '/twitter' },
-    { label: 'About', href: '/#about' },
+    { label: 'AI Companion', href: '/chat' },
   ];
 
   const handleNavClick = (e, href) => {
     if (href.startsWith('/#')) {
       e.preventDefault();
+      const id = href.slice(2);
       if (location.pathname !== '/') {
         navigate('/');
         setTimeout(() => {
-          const id = href.slice(2);
           document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
       } else {
-        const id = href.slice(2);
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
       }
     }
@@ -65,45 +64,49 @@ export default function Navbar() {
           </div>
           <div>
             <div style={{ fontSize: 17, fontWeight: 900, color: '#F1F5F9', letterSpacing: '-0.02em', lineHeight: 1 }}>MindCare</div>
-            <div style={{ fontSize: 9, color: '#2DD4BF', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>AI Mental Health</div>
+            <div style={{ fontSize: 9, color: '#2DD4BF', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>AI Companion</div>
           </div>
         </Link>
 
         {/* Desktop Nav */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="desktop-nav">
           {navLinks.map(({ label, href }) => {
-            const isActive = location.pathname === href || (href === '/#features' && location.pathname === '/');
+            const isActive = location.pathname === href;
+            const isSpecial = label === 'Assessment' || label === 'AI Companion';
             return (
-              <a
+              <Link
                 key={label}
-                href={href}
-                onClick={(e) => handleNavClick(e, href)}
+                to={href}
+                onClick={(e) => {
+                  if (href.startsWith('/#')) handleNavClick(e, href);
+                }}
                 style={{
                   padding: '8px 14px',
                   borderRadius: 8,
                   fontSize: 14,
-                  fontWeight: href === '/assessment' ? 700 : 500,
-                  color: href === '/assessment'
-                    ? '#2DD4BF'
-                    : isActive ? '#F1F5F9' : '#94A3B8',
-                  background: href === '/assessment' ? 'rgba(45,212,191,0.08)' : 'transparent',
-                  border: href === '/assessment' ? '1px solid rgba(45,212,191,0.2)' : '1px solid transparent',
+                  fontWeight: isActive ? 700 : 500,
+                  color: isActive ? '#2DD4BF' : '#94A3B8',
+                  background: isActive ? 'rgba(45,212,191,0.08)' : 'transparent',
+                  border: isActive ? '1px solid rgba(45,212,191,0.2)' : '1px solid transparent',
                   transition: 'all 0.2s',
                   cursor: 'pointer',
                   textDecoration: 'none',
                 }}
                 onMouseEnter={e => {
-                  if (href !== '/assessment') { e.currentTarget.style.color = '#F1F5F9'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }
+                  if (!isActive) {
+                    e.currentTarget.style.color = '#F1F5F9';
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                  }
                 }}
                 onMouseLeave={e => {
-                  if (href !== '/assessment') {
-                    e.currentTarget.style.color = isActive ? '#F1F5F9' : '#94A3B8';
+                  if (!isActive) {
+                    e.currentTarget.style.color = '#94A3B8';
                     e.currentTarget.style.background = 'transparent';
                   }
                 }}
               >
                 {label}
-              </a>
+              </Link>
             );
           })}
         </nav>

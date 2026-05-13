@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage';
 import AssessmentPage from './pages/AssessmentPage';
 import RedditScraperPage from './pages/RedditScraperPage';
 import TwitterScraperPage from './pages/TwitterScraperPage';
+import ChatPage from './pages/ChatPage';
 import './App.css';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/assessment" element={<AssessmentPage />} />
           <Route path="/reddit" element={<RedditScraperPage />} />
           <Route path="/twitter" element={<TwitterScraperPage />} />
+          <Route path="/chat" element={<ChatPage />} />
         </Routes>
       </main>
       <Footer />
