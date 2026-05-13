@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Loader2, AlertTriangle, Twitter, ExternalLink } from "lucide-react";
+import { Search, Loader2, AlertTriangle, X, ExternalLink } from "lucide-react";
 
 export default function TwitterScraperPage() {
   const [target, setTarget] = useState("");
@@ -53,7 +53,7 @@ export default function TwitterScraperPage() {
             background: "linear-gradient(135deg, #1DA1F2, #0ea5e9)",
             marginBottom: 20
           }}>
-            <Twitter size={30} color="#fff" />
+            <X size={30} color="#fff" />
           </div>
           <h1 style={{ fontSize: 48, fontWeight: 800, color: "#F8FAFC", marginBottom: 16 }}>
             X (Twitter) <span className="gradient-text">Analysis</span>
