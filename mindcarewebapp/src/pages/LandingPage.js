@@ -15,7 +15,7 @@ const stagger = {
   show: { transition: { staggerChildren: 0.12 } },
 };
 
-function HeroSection({ onTry }) {
+function HeroSection({ onTry, navigate }) {
   return (
     <section style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -293,7 +293,7 @@ export default function LandingPage() {
 
   return (
     <div>
-      <HeroSection onTry={goToApp} />
+      <HeroSection onTry={goToApp} navigate={navigate} />
       <FeaturesSection />
       <HowItWorksSection />
       <LevelsSection />
