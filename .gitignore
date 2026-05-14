@@ -29,3 +29,12 @@ WhatsApp Image*.jpeg
 # OS
 .DS_Store
 Thumbs.db
+
+# FYP Generated Documents (Slides, HTML reports, Diagrams, Scripts)
+*.html
+*.pptx
+ARCHITECTURE_DIAGRAMS.md
+create_pptx.py
+create_editable_pptx.py
+temp_pdf_page_*.png
+temp_html_slide_*.png
